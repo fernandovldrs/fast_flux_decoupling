@@ -4,13 +4,10 @@ import qutip as qt
 
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
+from scipy import integrate
 from numpy import linalg as LA
 
 from pulses import qd, q
-
-
-erf = sc.special.erf  # error function
-
 
 def build_guassian_pulse(sigma, chop):
     t0 = sigma * chop / 2
@@ -33,98 +30,28 @@ def configure_pi_pulse(system_params):
     if pulse_type == "gaussian":
         chop = system_params["pi_pulse_params"]["chop"]
         sigma = system_params["pi_pulse_params"]["sigma"]
+        pulse_length = chop*sigma
         pulse = build_guassian_pulse(sigma=sigma, chop=chop)
-        timesteps = np.linspace(0, sigma * chop, 50)
     else:
         pulse_length = system_params["pi_pulse_params"]["pulse_length"]
-        timesteps = np.linspace(0, pulse_length, 50)
         pulse = build_constant_pulse()
+
+    # Calculate rabi frequency of the pulse
+    ### Calculate rabi frequency for normalized square pi pulse
+    square_area = pulse_length*1
+    rabi_frequency_square = 1/4/square_area # Derived from rabi flip equation
+    
+    ### Calculate actual rabi frequency for input pulse 
+    pi_pulse_area, _ = integrate.quad(pulse, 0, pulse_length)
+    rabi_frequency = rabi_frequency_square*square_area/pi_pulse_area
+    
+    ### Update parameters
+    timesteps = np.linspace(0, pulse_length, 50)
     system_params["pi_pulse_params"]["pulse"] = pulse
-    system_params["pi_pulse_params"]["amp"] = pi_pulse_amp_calibrator(
-        device_params=system_params["device_params"],
-        pulse_params=system_params["pi_pulse_params"],
-        axis="y",
-        plot=False,
-    )
+    system_params["pi_pulse_params"]["rabi_freq"] = rabi_frequency
     system_params["pi_pulse_params"]["timesteps"] = timesteps
+    
     return system_params
-
-
-def pi_pulse_amp_calibrator(device_params, pulse_params, axis, plot=False):
-    """
-    Power Rabi: Use this to calibrate the amplitude needed to drive a qubit pi pulse
-    """
-    amp = np.linspace(0.0, 1.5, 199)
-    output = []
-
-    T1 = device_params["T1"]
-    Tphi = -1 / (1 / 2 / device_params["T1"] - 1 / device_params["T2"])
-
-    pulse_type = pulse_params["pulse_type"]
-    pulse = pulse_params["pulse"]
-    if pulse_type == "gaussian":
-        sigma = pulse_params["sigma"]
-        chop = pulse_params["chop"]
-        A0 = (
-            np.sqrt(2 / np.pi) / erf(np.sqrt(2)) * np.pi / (4 * sigma) / 2 / np.pi
-        )  # initial guess
-        tlist = np.linspace(0, sigma * chop, 50)  # in ns
-    else:
-        pulse_length = pulse_params["pulse_length"]
-        A0 = (
-            np.sqrt(2 / np.pi) / erf(np.sqrt(2)) * np.pi / pulse_length / 2 / np.pi
-        )  # initial guess
-        tlist = np.linspace(0, pulse_length, 50)  # in ns
-
-    for Ax in amp:
-        # A = (
-        #     np.sqrt(2 / np.pi) / erf(np.sqrt(2)) * np.pi / (4 * sigma) / 2 / np.pi
-        # )  # initial guess
-        # A0 = A  # keep it for later
-        A = A0
-        freq = 0  # resonant driving
-
-        A *= Ax  # coefficient for the Gaussian pulse
-
-        H0 = 2 * np.pi * freq * qd * q
-
-        if axis == "y":
-            Hd = 2 * np.pi * A * 1j * (qd - q)
-        else:
-            Hd = -2 * np.pi * A * (qd + q)
-
-        H = [H0, [Hd, pulse]]
-
-        psi = qt.basis(2, 0)  # initial state
-        rhoq = qt.ket2dm(psi)
-
-        c_ops = [np.sqrt(1 / T1) * q, np.sqrt(2 / Tphi) * qd * q]  # changed
-
-        e_ops = [
-            qd * q,
-        ]
-
-        # options = Options(max_step=1, nsteps=1e6)
-
-        results = qt.mesolve(
-            H, rhoq, tlist, c_ops=c_ops, e_ops=e_ops
-        )  # , options=options)  # , progress_bar = True)
-
-        output += [
-            results.expect[0][-1],
-        ]
-    if plot:
-        # for checking
-        plt.plot(amp, output)
-        plt.ylabel(r"pe")
-        plt.xlabel("Amplitude Scale")
-        plt.title("Power Rabi")
-        plt.grid()
-        plt.show()
-
-    print(max(output), output.index(max(output)), amp[output.index(max(output))])
-    # print(A0)
-    return A0 * amp[output.index(max(output))]  # this is the correct coeff
 
 
 # Gaussian function for curve fitting
