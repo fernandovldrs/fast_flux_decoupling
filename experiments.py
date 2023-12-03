@@ -7,7 +7,7 @@ def chi_hamiltonian_simulation(
     H, state, device_params, exp_params, finite_pulses=False, pulse_params=None
 ):
     num_iter = exp_params["num_iter"]
-    pulse_interval = np.linspace(0, exp_params["pulse_interval"], 20)
+    pulse_interval = np.linspace(0, exp_params["pulse_interval"], 100)
     # jump operators qubit-cavity
     Tphi = -1 / (1 / 2 / device_params["T1"] - 1 / device_params["T2"])
     c_ops = [
@@ -40,7 +40,7 @@ def chi_hamiltonian_simulation(
     return state
 
 def kerr_hamiltonian_simulation(H, state, device_params, experiment_params):
-    wait_timesteps = np.linspace(0, experiment_params["wait_time"], 50)
+    wait_timesteps = np.linspace(0, experiment_params["wait_time"], 1000)
     # jump operators qubit-cavity
     Tphi = -1 / (1 / 2 / device_params["T1"] - 1 / device_params["T2"])
     c_ops = [
