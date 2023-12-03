@@ -62,13 +62,6 @@ def kerr_hamiltonian_simulation(H, state, device_params, experiment_params):
 
 def char_func_ideal_2d(state, xvec, scale):
     """Calculate the Characteristic function as a 2Dgrid (xvec, xvec) for a given state.
-
-    Args:
-        state (Qobject): State of which we want to calc the charfunc
-        xvec (_type_): array of displacements. The char func will be calculated for the grid (xvec, xvec)
-
-    Returns:
-        tuple(ndarray, ndarray): Re(char func), Im(char func)
     """
     cfReal = np.empty((len(xvec), len(xvec)))
     cfImag = np.empty((len(xvec), len(xvec)))
