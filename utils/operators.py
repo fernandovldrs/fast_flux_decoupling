@@ -10,7 +10,7 @@ from qutip.qip.operations import rx, ry, rz
 cdim = 100
 c = qt.destroy(cdim)
 u_1 = (qt.basis(cdim, 0) + 0 * 1j * qt.basis(cdim, 1)).unit()
-rho = u_1 * u_1.dag()  # the to-be measured state
+rho_vacuum = u_1 * u_1.dag()  # the to-be measured state
 
 # for qubit
 qdim = 2
@@ -34,17 +34,8 @@ sy = qt.tensor(qt.sigmay(), Ic)
 # Projector for qubit in g
 Pg = qt.tensor(u_g * u_g.dag(), Ic)
 
-
-def Rx(theta):
-    return qt.tensor(rx(theta), Ic)
-
-
 def Ry(theta):
     return qt.tensor(ry(theta), Ic)
-
-
-def Rz(theta):
-    return qt.tensor(rz(theta), Ic)
 
 def get_dispersive_hamiltonian(device_params):
     chi = device_params["chi"]
