@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import qutip as qt
-from utils_fitting import gaussian_fit, gaussian, get_2d_guassian_sigma, gaussian_2d
+from utils.fitting import gaussian_fit, gaussian, get_2d_guassian_sigma, gaussian_2d
 
 
 def plot_2d_cmap(xvec, yvec, z, ax, vmin, vmax, title):

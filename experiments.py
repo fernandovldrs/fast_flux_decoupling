@@ -1,7 +1,7 @@
 import numpy as np
 import qutip as qt
 
-from pulses import *
+from utils.operators import *
 
 def chi_hamiltonian_simulation(
     H, state, device_params, exp_params, finite_pulses=False, pulse_params=None

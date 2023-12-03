@@ -8,7 +8,7 @@ from experiments import (
     char_func_ideal_1d,
     char_func_ideal_2d,
 )
-from utils_operators import (
+from utils.operators import (
     cdim,
     rho,
     u_g,
@@ -17,13 +17,13 @@ from utils_operators import (
     get_dispersive_hamiltonian,
 )
 
-from utils_fitting import (
+from utils.fitting import (
     gaussian,
     gaussian_fit,
     gaussian_2d,
     get_2d_guassian_sigma,
 )
-from utils_pulses import configure_pi_pulse
+from utils.pulses import configure_pi_pulse
 
 from plotting import (
     plot_double_2d_cmap,
