@@ -2,10 +2,12 @@ import numpy as np
 import qutip as qt
 import matplotlib.pyplot as plt
 
+from utils.pulses import configure_pi_pulse
+from utils.plotting import plot_2d_cmap
+
 from experiments import (
     chi_hamiltonian_simulation,
     kerr_hamiltonian_simulation,
-    char_func_ideal_1d,
     char_func_ideal_2d,
 )
 from utils.operators import (
@@ -17,12 +19,6 @@ from utils.operators import (
     get_dispersive_hamiltonian,
 )
 
-from utils.pulses import configure_pi_pulse
-
-from plotting import (
-    plot_double_2d_cmap,
-    plot_wigner,
-)
 
 device_params = {
     "chi": 0.679e-3, #1e-3, #0.94e-3, #0.679e-3,  # in GHz   0.679e-3
@@ -63,23 +59,14 @@ Configure sweep here. Format of sweep fields should be of the form <subcategory>
 sweep_field = "device_params:T1"
 sweep_points = [10e3, 15e3]
 """
-# sweep_field = "experiment_params:num_iter"
-# sweep_points = [0, 2, 4, 6, 8, 10, 12]
 
 sweep_field = "experiment_params:pulse_interval"
 sweep_points = [400,] #ns
-# units = "us"  # For figure labels
-# label_scale_factor = 1e-3  # For figure labels
-
-# sweep_field = "device_params:nbar_qubit"
-# sweep_points = [0.02, 0.04, 0.06, 0.08, 0.1, 0.12, 0.14]
-units = "ns"  # For figure labels
-label_scale_factor = 1  # For figure labels
 
 # choose between kerr or chi experiment
 experiment = "chi"
 # choose if finite pulses are to be used (only applicable for chi exp)
-finite_pulses = True # False #True
+finite_pulses = True
 
 project_to_ground = True
 
@@ -87,7 +74,7 @@ project_to_ground = True
 plot_type = "char" # char/ wigner
 plot_data = False
 max_alpha = 4
-npts = 101
+npts = 61
 xvec = np.linspace(-max_alpha, max_alpha, npts)
 
 
@@ -151,37 +138,15 @@ if __name__ == "__main__":
         state = Pg * state * Pg # this should be right 
         
         
-    # measurement and plotting
-    x_sig = []
-    y_sig = []
-    sig_ratio = []
-    if plot_type == "wigner":
-        plot_wigner(state)
-    elif plot_type == "char":
-        for i in range(len(result_states)):
-            state = result_states[i]
-            name = sweep_points[i] * label_scale_factor
-            cf_real, cf_imag = char_func_ideal_2d(state=state, xvec=xvec, scale =1)
+    # Plotting
+    for i in range(len(result_states)):
+        state = result_states[i]
+        name = sweep_points[i]
+        cf_real, cf_imag = char_func_ideal_2d(state=state, xvec=xvec, scale = 1)
+        wigner = qt.wigner(qt.ptrace(state, 1), xvec, xvec, g = 2 )
 
-            real_title = f"{param} = {name} {units} real"
-            imag_title = f"{param} = {name} {units} imag"
-            _ = plot_double_2d_cmap(
-                xvecs=(xvec, xvec),
-                yvecs=(xvec, xvec),
-                zs=(cf_real, cf_imag),
-                vmin=-1,
-                vmax=1,
-                titles=(real_title, imag_title),
-            )
-
-            plt.show()
-            
-        if plot_data:
-            x_axis = sweep_points
-            fig, axes = plt.subplots()
-            axes.plot(x_axis, sig_ratio)
-
-            axes.set_xlabel("kerr factor")
-            axes.set_ylabel("sigma ratio")
-
-            plt.show()
+        fig, axes = plt.subplots(1, 3)
+        plot_2d_cmap(xvec, wigner, axes[0], title = "Wigner")
+        plot_2d_cmap(xvec, cf_real, axes[1], title = "Char function Re")
+        plot_2d_cmap(xvec, cf_imag, axes[2], title = "Char function Im")
+        plt.show()
