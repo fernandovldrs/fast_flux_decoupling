@@ -21,9 +21,6 @@ from utils.pulses import configure_pi_pulse
 
 from plotting import (
     plot_double_2d_cmap,
-    plot_double_1d_graphs,
-    plot_2d_cmap,
-    do_fitting,
     plot_wigner,
 )
 
@@ -93,18 +90,6 @@ max_alpha = 4
 npts = 101
 xvec = np.linspace(-max_alpha, max_alpha, npts)
 
-# Plotting params for 2D plots
-vmin = -1
-vmax = 1
-
-plot_imag = False
-plot_real = True
-
-# Plotting params for 1D plots
-axis = "x"
-cut_point = 0
-do_fits = (False, False)
-
 
 if __name__ == "__main__":
     # configure sweep
@@ -144,7 +129,6 @@ if __name__ == "__main__":
         )
 
         # experiment
-        
         if experiment == "chi":
             state = chi_hamiltonian_simulation(
                 H=ham,
@@ -185,16 +169,11 @@ if __name__ == "__main__":
                 xvecs=(xvec, xvec),
                 yvecs=(xvec, xvec),
                 zs=(cf_real, cf_imag),
-                vmin=vmin,
-                vmax=vmax,
+                vmin=-1,
+                vmax=1,
                 titles=(real_title, imag_title),
             )
 
-            if plot_data:
-                (sig1, sig2, v1, v2, opt) = do_fitting(x=xvec, y=xvec, z=cf_real)
-                x_sig.append(sig1)
-                y_sig.append(sig2)
-                sig_ratio.append(min(sig1, sig2) / max(sig1, sig2))
             plt.show()
             
         if plot_data:
