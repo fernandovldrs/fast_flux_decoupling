@@ -87,37 +87,3 @@ def char_func_ideal_2d(state, xvec, scale):
 
     return cfReal, cfImag
 
-
-def char_func_ideal_1d(state, xvec, axis, cut_point=0):
-    """Calculate the Characteristic function as a 1D line xvec for a given state.
-
-    Args:
-        state (Qobject): State of which we want to calc the charfunc
-        xvec (_type_): array of displacements. The char func will be calculated for the grid (xvec, xvec)
-        axis (string): axis of which to make the 1d cut (either x or y).
-        cut_point (int): the point on the axiss on which to make the 1d cut (defaults to 0).
-
-    Returns:
-        tuple(ndarray, ndarray): Re(char func), Im(char func)
-    """
-    cfReal = np.empty(len(xvec))
-    cfImag = np.empty(len(xvec))
-    N = state.dims[0][1]
-
-    if axis == "x":
-        for i, alpha_x in enumerate(xvec):
-            expect_value = qt.expect(
-                qt.displace(N, alpha_x + 1j * cut_point), qt.ptrace(state, 1)
-            )
-            cfReal[i] = np.real(expect_value)
-            cfImag[i] = np.imag(expect_value)
-
-    else:
-        for j, alpha_p in enumerate(xvec):
-            expect_value = qt.expect(
-                qt.displace(N, cut_point + 1j * alpha_p), qt.ptrace(state, 1)
-            )
-            cfReal[j] = np.real(expect_value)
-            cfImag[j] = np.imag(expect_value)
-
-    return cfReal, cfImag
