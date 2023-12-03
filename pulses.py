@@ -60,12 +60,3 @@ def get_dispersive_hamiltonian(device_params):
     H_kerr = H_dis - 2 * np.pi * kerr * 0.5 * Cd * Cd * C * C
     print(f"Kerr at this point is {kerr * 1e6:.3f} kHz")
     return H_kerr
-
-
-def get_ry_pi2_hamiltonian(amp):
-    H_ry_pi2 = 2 * np.pi * amp * 1j * (Qd - Q) / 2  # 1/2 factor for Ry(pi/2)
-    return H_ry_pi2
-
-def get_ry_pi_hamiltonian(amp):
-    H_ry_pi = 2 * np.pi * amp * 1j * (Qd - Q)  # 1/2 factor for Ry(pi/2)
-    return H_ry_pi
