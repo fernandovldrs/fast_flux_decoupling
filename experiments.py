@@ -1,6 +1,5 @@
 import numpy as np
 import qutip as qt
-import matplotlib.pyplot as plt
 
 from pulses import *
 
@@ -33,8 +32,6 @@ def chi_hamiltonian_simulation_pi2(
         results = qt.mesolve(H, psi_flip, pulse_interval, c_ops=c_ops)
         state = results.states[-1]
     return state
-
-
 
 def kerr_hamiltonian_simulation(H, state, device_params, experiment_params):
     wait_timesteps = np.linspace(0, experiment_params["wait_time"], 50)

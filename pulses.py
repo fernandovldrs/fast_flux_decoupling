@@ -46,24 +46,17 @@ def Ry(theta):
 def Rz(theta):
     return qt.tensor(rz(theta), Ic)
 
-
 def get_dispersive_hamiltonian(device_params):
     chi = device_params["chi"]
     anharm = device_params["anharm"]
-    H_disp = -2 * np.pi * chi * Cd * C * Qd * Q - 2 * np.pi * anharm / 2 * Qd * Qd * Q * Q #-2 * np.pi * chi * Cd * C * Qd * Q
-    return H_disp
-
-
-def get_dispersive_hamiltonian_with_kerr(device_params):
-    chi = device_params["chi"]
-    kappa = device_params["anharm"]
     kerr_override = device_params["kerr"]
     if kerr_override is not None:
         kerr = kerr_override
     else:
-        kerr = (chi**2) / (4 * kappa)
+        kerr = (chi**2) / (4 * anharm)
 
-    H_dis = get_dispersive_hamiltonian(device_params=device_params)
+    H_dis = -2 * np.pi * chi * Cd * C * Qd * Q - 2 * np.pi * anharm / 2 * Qd * Qd * Q * Q 
+    
     H_kerr = H_dis - 2 * np.pi * kerr * 0.5 * Cd * Cd * C * C
     print(f"Kerr at this point is {kerr * 1e6:.3f} kHz")
     return H_kerr

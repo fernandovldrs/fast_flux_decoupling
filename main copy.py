@@ -15,7 +15,6 @@ from pulses import (
     u_e,
     Pg,
     get_dispersive_hamiltonian,
-    get_dispersive_hamiltonian_with_kerr,
     get_ry_pi_hamiltonian,
 )
 
@@ -160,8 +159,6 @@ if __name__ == "__main__":
 
         # setting system hamiltonian
         if include_kerr:
-            ham = get_dispersive_hamiltonian_with_kerr(device_params=d_params)
-        else:
             ham = get_dispersive_hamiltonian(device_params=d_params)
 
         # state preparation
