@@ -4,38 +4,6 @@ import matplotlib.pyplot as plt
 
 from pulses import *
 
-
-
-# pi2*1 wait
-def chi_hamiltonian_simulation_wait(
-    H, state, device_params, exp_params, finite_pulses=False, pulse_params=None
-):
-    # num_iter = exp_params["num_iter"]
-    pulse_interval = np.linspace(0, exp_params["pulse_interval"], 20)
-    # jump operators qubit-cavity
-    Tphi = -1 / (1 / 2 / device_params["T1"] - 1 / device_params["T2"])
-    c_ops = [
-        # Qubit Relaxation
-        np.sqrt(1 / device_params["T1"]) * Q,
-        # Qubit Dephasing, changed
-        np.sqrt(2 / Tphi) * Qd * Q,
-        # Cavity Relaxation
-        np.sqrt((1 + device_params["nbar_cav"]) / device_params["cavT1"]) * C,
-        # Cavity Thermal Excitations
-        np.sqrt(device_params["nbar_cav"] / device_params["cavT1"]) * Cd,
-    ]
-    
-    if finite_pulses:
-        psi_flip = RY_pi2_exp(
-            H=H, state=state, device_params=device_params, pulse_params=pulse_params
-        ).states[-1]
-    else:
-        psi_flip = Ry(np.pi / 2) * state * Ry(np.pi / 2).dag()
-    results = qt.mesolve(H, psi_flip, pulse_interval, c_ops=c_ops)
-    state = results.states[-1]
-    return state
-
-# pi2*6 chi
 def chi_hamiltonian_simulation_pi2(
     H, state, device_params, exp_params, finite_pulses=False, pulse_params=None
 ):
@@ -54,202 +22,18 @@ def chi_hamiltonian_simulation_pi2(
         np.sqrt(device_params["nbar_cav"] / device_params["cavT1"]) * Cd,
     ]
     for i in range(num_iter):
-        if finite_pulses:
-            psi_flip = RY_pi2_exp(
-                H=H, state=state, device_params=device_params, pulse_params=pulse_params
-            ).states[-1]
+        if finite_pulses:            
+            H_ry_pi2 = get_ry_pi2_hamiltonian(amp=pulse_params["amp"])
+            
+            H_pulse = [H, [H_ry_pi2, pulse_params["pulse"]]]
+            psi_flip = qt.mesolve(H_pulse, state, pulse_params["timesteps"], c_ops).states[-1]
+
         else:
             psi_flip = Ry(np.pi / 2) * state * Ry(np.pi / 2).dag()
         results = qt.mesolve(H, psi_flip, pulse_interval, c_ops=c_ops)
         state = results.states[-1]
     return state
 
-# pi*6 chi
-
-def chi_hamiltonian_simulation_pi(
-    H, state, device_params, exp_params, finite_pulses=False, pulse_params=None
-):
-    num_iter = exp_params["num_iter"]
-    pulse_interval = np.linspace(0, exp_params["pulse_interval"], 20)
-    # jump operators qubit-cavity
-    Tphi = -1 / (1 / 2 / device_params["T1"] - 1 / device_params["T2"])
-    c_ops = [
-        # Qubit Relaxation
-        np.sqrt(1 / device_params["T1"]) * Q,
-        # Qubit Dephasing, changed
-        np.sqrt(2 / Tphi) * Qd * Q,
-        # Cavity Relaxation
-        np.sqrt((1 + device_params["nbar_cav"]) / device_params["cavT1"]) * C,
-        # Cavity Thermal Excitations
-        np.sqrt(device_params["nbar_cav"] / device_params["cavT1"]) * Cd,
-    ]
-    for i in range(num_iter):
-        if finite_pulses:
-            psi_flip = RY_pi_exp(
-                H=H, state=state, device_params=device_params, pulse_params=pulse_params
-            ).states[-1]
-        else:
-            psi_flip = Ry(np.pi) * state * Ry(np.pi).dag()
-        results = qt.mesolve(H, psi_flip, pulse_interval, c_ops=c_ops)
-        state = results.states[-1]
-    return state
-
-def chi_hamiltonian_simulation_pi_mine(
-    H, state, device_params, exp_params, finite_pulses=False, pulse_params=None
-):
-    num_iter = exp_params["num_iter"]
-    pulse_interval = np.linspace(0, exp_params["pulse_interval"], 20)
-    # jump operators qubit-cavity
-    Tphi = -1 / (1 / 2 / device_params["T1"] - 1 / device_params["T2"])
-    c_ops = [
-        # Qubit Relaxation
-        np.sqrt(1 / device_params["T1"]) * Q,
-        # Qubit Dephasing, changed
-        np.sqrt(2 / Tphi) * Qd * Q,
-        # Cavity Relaxation
-        np.sqrt((1 + device_params["nbar_cav"]) / device_params["cavT1"]) * C,
-        # Cavity Thermal Excitations
-        np.sqrt(device_params["nbar_cav"] / device_params["cavT1"]) * Cd,
-    ]
-    for i in range(num_iter):
-        if finite_pulses:
-            psi_flip = RY_pi_exp(
-                H=H, state=state, device_params=device_params, pulse_params=pulse_params
-            ).states[-1]
-        else:
-            psi_flip = Ry(np.pi) * state * Ry(np.pi).dag()
-        results = qt.mesolve(H, psi_flip, pulse_interval, c_ops=c_ops)
-        state = results.states[-1]
-    if finite_pulses:
-        psi_flip = RY_pi_exp(
-            H=H, state=state, device_params=device_params, pulse_params=pulse_params
-        ).states[-1]
-    else:
-        psi_flip = Ry(np.pi) * state * Ry(np.pi).dag()    
-    return state
-
-
-# def chi_hamiltonian_simulation_pi(
-#     H, state, device_params, exp_params, finite_pulses=False, pulse_params=None
-# ):
-#     num_iter = exp_params["num_iter"]
-#     pulse_interval = np.linspace(0, exp_params["pulse_interval"], 20)
-#     # jump operators qubit-cavity
-#     Tphi = -1 / (1 / 2 / device_params["T1"] - 1 / device_params["T2"])
-#     c_ops = [
-#         # Qubit Relaxation
-#         np.sqrt(1 / device_params["T1"]) * Q,
-#         # Qubit Dephasing, changed
-#         np.sqrt(2 / Tphi) * Qd * Q,
-#         # Cavity Relaxation
-#         np.sqrt((1 + device_params["nbar_cav"]) / device_params["cavT1"]) * C,
-#         # Cavity Thermal Excitations
-#         np.sqrt(device_params["nbar_cav"] / device_params["cavT1"]) * Cd,
-#     ]
-#     for i in range(num_iter):
-#         if finite_pulses:
-#             psi_flip = RY_pi_exp(
-#                 H=H, state=state, device_params=device_params, pulse_params=pulse_params
-#             ).states[-1]
-#         else:
-#             psi_flip = Ry(np.pi) * state * Ry(np.pi).dag()
-#         results = qt.mesolve(H, psi_flip, pulse_interval, c_ops=c_ops)
-#         state = results.states[-1]
-#     return state
-
-def chi_new_hamiltonian_simulation(
-    H, state, device_params, exp_params, finite_pulses=False, pulse_params=None
-):
-    num_iter = exp_params["num_iter"]
-    pulse_interval = np.linspace(0, exp_params["pulse_interval"], 20)
-    total_exp_time = exp_params["evolve_time"]
-    evolve_time = total_exp_time - (num_iter * (exp_params["pulse_interval"]))
-    print(evolve_time)
-    evolve_interval = np.linspace(0, evolve_time, 100)
-    # jump operators qubit-cavity
-    Tphi = -1 / (1 / 2 / device_params["T1"] - 1 / device_params["T2"])
-    c_ops = [
-        # Qubit Relaxation
-        np.sqrt(1 / device_params["T1"]) * Q,
-        # Qubit Dephasing, changed
-        np.sqrt(2 / Tphi) * Qd * Q,
-        # Cavity Relaxation
-        np.sqrt((1 + device_params["nbar_cav"]) / device_params["cavT1"]) * C,
-        # Cavity Thermal Excitations
-        np.sqrt(device_params["nbar_cav"] / device_params["cavT1"]) * Cd,
-    ]
-    for i in range(num_iter):
-        if finite_pulses:
-            psi_flip = RY_pi_exp(
-                H=H, state=state, device_params=device_params, pulse_params=pulse_params
-            ).states[-1]
-        else:
-            psi_flip = Ry(np.pi) * state * Ry(np.pi).dag()
-        results = qt.mesolve(H, psi_flip, pulse_interval, c_ops=c_ops)
-        state = results.states[-1]
-    final_evolution = qt.mesolve(H, state, evolve_interval, c_ops=c_ops)
-    state = final_evolution.states[-1]
-    state = state
-    return state
-
-
-def chi_hamiltonian_simulation_long_pulse(
-    H, state, device_params, exp_params, finite_pulses=False, pulse_params=None
-):
-    pulse_time = exp_params["pulse_time"]
-    timesteps = np.linspace(0, pulse_time, 50)
-    scaling_factor = exp_params["amp_scale"]
-    Tphi = -1 / (1 / 2 / device_params["T1"] - 1 / device_params["T2"])
-    c_ops = [
-        # Qubit Relaxation
-        np.sqrt(1 / device_params["T1"]) * Q,
-        # Qubit Dephasing, changed
-        np.sqrt(2 / Tphi) * Qd * Q,
-        # Cavity Relaxation
-        np.sqrt((1 + device_params["nbar_cav"]) / device_params["cavT1"]) * C,
-        # Cavity Thermal Excitations
-        np.sqrt(device_params["nbar_cav"] / device_params["cavT1"]) * Cd,
-    ]
-    H_ry_pi = get_ry_pi_hamiltonian(amp=scaling_factor * pulse_params["amp"])
-    # print(pulse_params["timesteps"])
-    H = [H, [H_ry_pi, pulse_params["pulse"]]]
-
-    results = qt.mesolve(H, state, timesteps, c_ops).states[-1]
-    return results
-
-
-def chi_hamiltonian_simulation_long_pulse_q_pop(
-    H, state, device_params, exp_params, finite_pulses=False, pulse_params=None
-):
-    pulse_time = exp_params["pulse_time"]
-    snap_shots = 20
-    snap_time = pulse_time / snap_shots
-    timesteps = np.linspace(0, snap_time, 50)
-    qubit_expect_vals = []
-    scaling_factor = exp_params["amp_scale"]
-    Tphi = -1 / (1 / 2 / device_params["T1"] - 1 / device_params["T2"])
-    c_ops = [
-        # Qubit Relaxation
-        np.sqrt(1 / device_params["T1"]) * Q,
-        # Qubit Dephasing, changed
-        np.sqrt(2 / Tphi) * Qd * Q,
-        # Cavity Relaxation
-        np.sqrt((1 + device_params["nbar_cav"]) / device_params["cavT1"]) * C,
-        # Cavity Thermal Excitations
-        np.sqrt(device_params["nbar_cav"] / device_params["cavT1"]) * Cd,
-    ]
-    H_ry_pi = get_ry_pi_hamiltonian(amp=scaling_factor * pulse_params["amp"])
-    # print(pulse_params["timesteps"])
-    H = [H, [H_ry_pi, pulse_params["pulse"]]]
-    for i in range(snap_shots):
-        state = qt.mesolve(H, state, timesteps, c_ops).states[-1]
-        qubit_expect = qt.expect(qd * q, qt.ptrace(state, 0))
-        qubit_expect_vals.append(qubit_expect)
-    plt.plot(np.linspace(0, pulse_time, snap_shots), qubit_expect_vals)
-    plt.show()
-
-    # state = results
-    return state
 
 
 def kerr_hamiltonian_simulation(H, state, device_params, experiment_params):

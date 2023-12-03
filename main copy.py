@@ -4,15 +4,9 @@ import matplotlib.pyplot as plt
 
 from experiments import (
     chi_hamiltonian_simulation_pi2,
-    chi_hamiltonian_simulation_pi,
-    chi_hamiltonian_simulation_long_pulse,
-    chi_new_hamiltonian_simulation,
-    chi_hamiltonian_simulation_long_pulse_q_pop,
-    chi_hamiltonian_simulation_wait,
     kerr_hamiltonian_simulation,
     char_func_ideal_1d,
     char_func_ideal_2d,
-    chi_hamiltonian_simulation_pi_mine,
 )
 from pulses import (
     cdim,
@@ -113,10 +107,6 @@ label_scale_factor = 1  # For figure labels
 
 # choose between kerr or chi experiment
 experiment = "chi_pi2" 
-# experiment = "chi_pi_wait_old" 
-# experiment = "chi_pi"
-# experiment = "chi_pi_mine"
-# experiment = "chi_pi2_wait"
 # choose to include kerr term in hamiltonian
 include_kerr = True #True
 # choose if finite pulses are to be used (only applicable for chi exp)
@@ -174,7 +164,7 @@ if __name__ == "__main__":
         else:
             ham = get_dispersive_hamiltonian(device_params=d_params)
 
-        # state perparation
+        # state preparation
         Ds = qt.displace(cdim, e_params["alpha"])
         rho_d = Ds.dag() * rho * Ds
         rho_f1 = (qt.fock(cdim, 1)) * (qt.fock(cdim, 1)).dag()

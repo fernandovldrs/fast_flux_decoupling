@@ -90,42 +90,6 @@ def get_ry_pi_hamiltonian(amp):
 ############### Pulses ################
 #######################################
 
-
-def RY_pi2_exp(H, state, pulse_params, device_params):
-    Tphi = -1 / (1 / 2 / device_params["T1"] - 1 / device_params["T2"])
-    c_ops = [
-        # Qubit Relaxation
-        np.sqrt(1 / device_params["T1"]) * Q,
-        # Qubit Dephasing, changed
-        np.sqrt(2 / Tphi) * Qd * Q,
-        # Cavity Relaxation
-        np.sqrt((1 + device_params["nbar_cav"]) / device_params["cavT1"]) * C,
-        # Cavity Thermal Excitations
-        np.sqrt(device_params["nbar_cav"] / device_params["cavT1"]) * Cd,
-    ]
-    H_ry_pi2 = get_ry_pi2_hamiltonian(amp=pulse_params["amp"])
-
-    H = [H, [H_ry_pi2, pulse_params["pulse"]]]
-    return qt.mesolve(H, state, pulse_params["timesteps"], c_ops)
-
-
-def RY_pi_exp(H, state, pulse_params, device_params):
-    Tphi = -1 / (1 / 2 / device_params["T1"] - 1 / device_params["T2"])
-    c_ops = [
-        # Qubit Relaxation
-        np.sqrt(1 / device_params["T1"]) * Q,
-        # Qubit Dephasing, changed
-        np.sqrt(2 / Tphi) * Qd * Q,
-        # Cavity Relaxation
-        np.sqrt((1 + device_params["nbar_cav"]) / device_params["cavT1"]) * C,
-        # Cavity Thermal Excitations
-        np.sqrt(device_params["nbar_cav"] / device_params["cavT1"]) * Cd,
-    ]
-    H_ry_pi = get_ry_pi_hamiltonian(amp=pulse_params["amp"])
-    # print(pulse_params["timesteps"])
-    H = [H, [H_ry_pi, pulse_params["pulse"]]]
-    return qt.mesolve(H, state, pulse_params["timesteps"], c_ops)
-
 def RY_pi_exp_phase_amp(H, state, pulse_params, device_params):
     Tphi = -1 / (1 / 2 / device_params["T1"] - 1 / device_params["T2"])
     c_ops = [
