@@ -30,19 +30,17 @@ from plotting import (
 device_params = {
     "chi": 0.679e-3, #1e-3, #0.94e-3, #0.679e-3,  # in GHz   0.679e-3
     "T1": 15e3,  # 15e3,  # in ns
-    "T2": 400, #400,  # in ns
-    # "T2": 400, #400,  # in ns
+    "T2": 400, # in ns
     "cavT1": 30e3,  # in ns
     "nbar_cav": 0.03,  # thermal state population of cavity
     "anharm": 0.200,  # anharmonicity of qubit in GHz
-    "g": 7.3e-3,  # coupling strength in GHz
     "nbar_qubit": 0.05,  # thermal state population of qubit
     "kerr": 0.000006,  # overwrites analytical value of kerr (in GHz) if not None
 }
 
 pi_pulse_params = {
     "pulse_type": "gaussian",  # can be constant or gaussian
-    "pulse_length": 100,  # in ns, only for constant pulses
+    # "pulse_length": 100,  # in ns, only for constant pulses
     "sigma": 10,  # in ns, only for gaussian pulses
     "chop": 4,  # only for gaussian pulses
     "rabi_freq": None,  # to be set during runtime
@@ -145,11 +143,6 @@ if __name__ == "__main__":
             + d_params["nbar_qubit"] * u_e * u_e.dag(),
             rho_d,
         )
-        # state = qt.tensor(u_g * u_g.dag(), rho_d)
-
-        if d_params["chi"] > 0:
-            detuning = (d_params["g"] ** 2) / (d_params["chi"])
-            print(f"Detuning here should be {detuning * 1e3} MHz")
 
         # experiment
         
