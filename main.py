@@ -10,7 +10,7 @@ from experiments import (
 )
 from utils.operators import (
     cdim,
-    rho,
+    rho_vacuum,
     u_g,
     u_e,
     Pg,
@@ -48,13 +48,11 @@ pi_pulse_params = {
     "timesteps": None,  # to be set during runtime
 }
 experiment_params = {
-    "alpha": 1.5,  # choose the coherent state you want to create
+    "alpha": 2.5,  # choose the coherent state you want to create
     "num_iter":10,  # only for chi experiments
     "pulse_interval": None,  # in ns, only for chi experiments
     "amp_scale": 0.5,  # Use 1 for pi, 0.5 for pi2. Only for chi long experiments
-    "pulse_time": 1e3,  # only for chi long experiments
     "wait_time": 10e3,  # in ns, only for kerr experiments
-    "evolve_time": 10e3,  # in ns, only for old chi exp
 }
 
 system_params = {
@@ -82,7 +80,7 @@ units = "ns"  # For figure labels
 label_scale_factor = 1  # For figure labels
 
 # choose between kerr or chi experiment
-experiment = "chi_pi2" 
+experiment = "chi"
 # choose if finite pulses are to be used (only applicable for chi exp)
 finite_pulses = True # False #True
 
@@ -131,13 +129,14 @@ if __name__ == "__main__":
         d_params = system_params["device_params"]
         p_params = system_params["pi_pulse_params"]
         e_params = system_params["experiment_params"]
+        
         # setting system hamiltonian
         ham = get_dispersive_hamiltonian(device_params=d_params)
 
         # state preparation
         Ds = qt.displace(cdim, e_params["alpha"])
-        rho_d = Ds.dag() * rho * Ds
-        rho_f1 = (qt.fock(cdim, 1)) * (qt.fock(cdim, 1)).dag()
+        rho_d = Ds.dag() * rho_vacuum * Ds
+        
         state = qt.tensor(
             (1 - d_params["nbar_qubit"]) * u_g * u_g.dag()
             + d_params["nbar_qubit"] * u_e * u_e.dag(),
@@ -146,7 +145,7 @@ if __name__ == "__main__":
 
         # experiment
         
-        if experiment == "chi_pi2": #pi2 chi
+        if experiment == "chi":
             state = chi_hamiltonian_simulation(
                 H=ham,
                 state=state,
@@ -155,7 +154,7 @@ if __name__ == "__main__":
                 finite_pulses=finite_pulses,
                 pulse_params=p_params,
             )
-        else:
+        elif experiment == "kerr":
             state = kerr_hamiltonian_simulation(
                 H=ham,
                 state=state,
@@ -166,6 +165,8 @@ if __name__ == "__main__":
 
     if project_to_ground:
         state = Pg * state * Pg # this should be right 
+        
+        
     # measurement and plotting
     x_sig = []
     y_sig = []
@@ -180,39 +181,14 @@ if __name__ == "__main__":
 
             real_title = f"{param} = {name} {units} real"
             imag_title = f"{param} = {name} {units} imag"
-            if plot_imag and plot_real:
-                _ = plot_double_2d_cmap(
-                    xvecs=(xvec, xvec),
-                    yvecs=(xvec, xvec),
-                    zs=(cf_real, cf_imag),
-                    vmin=vmin,
-                    vmax=vmax,
-                    titles=(real_title, imag_title),
-                )
-            elif plot_imag:
-                fig, axes = plt.subplots()
-                _ = plot_2d_cmap(
-                    xvec=xvec,
-                    yvec=xvec,
-                    z=(cf_imag),
-                    ax=axes,
-                    vmin=vmin,
-                    vmax=vmax,
-                    title=(imag_title),
-                )
-            elif plot_real:
-                fig, axes = plt.subplots()
-                _ = plot_2d_cmap(
-                    xvec=xvec,
-                    yvec=xvec,
-                    z=(cf_real),
-                    ax=axes,
-                    vmin=vmin,
-                    vmax=vmax,
-                    title=(real_title),
-                )
-            else:
-                pass
+            _ = plot_double_2d_cmap(
+                xvecs=(xvec, xvec),
+                yvecs=(xvec, xvec),
+                zs=(cf_real, cf_imag),
+                vmin=vmin,
+                vmax=vmax,
+                titles=(real_title, imag_title),
+            )
 
             if plot_data:
                 (sig1, sig2, v1, v2, opt) = do_fitting(x=xvec, y=xvec, z=cf_real)
@@ -220,9 +196,7 @@ if __name__ == "__main__":
                 y_sig.append(sig2)
                 sig_ratio.append(min(sig1, sig2) / max(sig1, sig2))
             plt.show()
-            # plt.savefig(
-            #     f"new_chi_values/{(sweep_points[i])}_kerr_exp_wait_10us_alpha_5.png"
-            # )
+            
         if plot_data:
             x_axis = sweep_points
             fig, axes = plt.subplots()
@@ -232,57 +206,3 @@ if __name__ == "__main__":
             axes.set_ylabel("sigma ratio")
 
             plt.show()
-
-    else:
-        fit_text = [[], []]
-        real_title = f"{axis}-axis cut real"
-        imag_title = f"{axis}-axis cut imag"
-        fig, axes = plt.subplots(1, 2)
-        for i in range(len(result_states)):
-            name = sweep_points[i] * label_scale_factor
-            label = f"{name} {units}"
-            state = result_states[i]
-            name = sweep_points[i] * label_scale_factor
-            cf_real, cf_imag = char_func_ideal_1d(
-                state=state, xvec=xvec, axis=axis, cut_point=cut_point
-            )
-            _, axes, opts = plot_double_1d_graphs(
-                fig=fig,
-                axes=axes,
-                xvecs=(xvec, xvec),
-                yvecs=(cf_real, cf_imag),
-                do_fits=do_fits,
-                label=label,
-            )
-
-            for opt in opts:
-                if opt:
-                    sigma = opt[2]
-                    fit_text[0].append(f"{name} R-sigma = {sigma:.5f}")
-
-        text_real = "\n".join(fit_text[0])
-        axes[0].set_title(real_title)
-        axes[0].legend()
-        axes[0].text(
-            0,
-            -0.06,
-            text_real,
-            horizontalalignment="left",
-            verticalalignment="top",
-            transform=axes[0].transAxes,
-            fontsize=6,
-        )
-
-        text_imag = "\n".join(fit_text[1])
-        axes[1].set_title(imag_title)
-        axes[1].legend()
-        axes[1].text(
-            0,
-            -0.06,
-            text_imag,
-            horizontalalignment="left",
-            verticalalignment="top",
-            transform=axes[1].transAxes,
-            fontsize=6,
-        )
-        plt.show()
