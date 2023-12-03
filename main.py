@@ -17,12 +17,6 @@ from utils.operators import (
     get_dispersive_hamiltonian,
 )
 
-from utils.fitting import (
-    gaussian,
-    gaussian_fit,
-    gaussian_2d,
-    get_2d_guassian_sigma,
-)
 from utils.pulses import configure_pi_pulse
 
 from plotting import (
@@ -59,7 +53,7 @@ experiment_params = {
     "alpha": 1.5,  # choose the coherent state you want to create
     "num_iter":10,  # only for chi experiments
     "pulse_interval": None,  # in ns, only for chi experiments
-    "amp_scale": 1,  # Use 1 for pi, 0.5 for pi2. Only for chi long experiments
+    "amp_scale": 0.5,  # Use 1 for pi, 0.5 for pi2. Only for chi long experiments
     "pulse_time": 1e3,  # only for chi long experiments
     "wait_time": 10e3,  # in ns, only for kerr experiments
     "evolve_time": 10e3,  # in ns, only for old chi exp

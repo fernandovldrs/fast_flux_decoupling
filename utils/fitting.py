@@ -1,3 +1,7 @@
+import numpy as np
+
+from scipy.optimize import curve_fit
+from numpy import linalg as LA
 
 
 # Gaussian function for curve fitting

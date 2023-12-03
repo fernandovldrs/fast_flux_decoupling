@@ -1,11 +1,5 @@
 import numpy as np
-import scipy as sc
-import qutip as qt
-
-import matplotlib.pyplot as plt
-from scipy.optimize import curve_fit
 from scipy import integrate
-from numpy import linalg as LA
 
 def build_guassian_pulse(sigma, chop):
     t0 = sigma * chop / 2
