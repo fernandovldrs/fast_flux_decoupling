@@ -38,7 +38,7 @@ def configure_pi_pulse(system_params):
     rabi_frequency = rabi_frequency_square*square_area/pi_pulse_area
     
     ### Update parameters
-    timesteps = np.linspace(0, pulse_length, 50)
+    timesteps = np.linspace(0, pulse_length, 100)
     system_params["pi_pulse_params"]["pulse"] = pulse
     system_params["pi_pulse_params"]["rabi_freq"] = rabi_frequency
     system_params["pi_pulse_params"]["timesteps"] = timesteps
