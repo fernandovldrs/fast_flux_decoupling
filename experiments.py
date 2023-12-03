@@ -3,7 +3,7 @@ import qutip as qt
 
 from pulses import *
 
-def chi_hamiltonian_simulation_pi2(
+def chi_hamiltonian_simulation(
     H, state, device_params, exp_params, finite_pulses=False, pulse_params=None
 ):
     num_iter = exp_params["num_iter"]
@@ -20,17 +20,23 @@ def chi_hamiltonian_simulation_pi2(
         # Cavity Thermal Excitations
         np.sqrt(device_params["nbar_cav"] / device_params["cavT1"]) * Cd,
     ]
+    
+    # Define pulse hamiltonian
+    amp = pulse_params["rabi_freq"]*exp_params["amp_scale"]
+    H_ry_pi = 2 * np.pi * amp * 1j * (Qd - Q)
+    # Include pulse hamiltonian in the system hamiltonian
+    H_pulse = [H, [H_ry_pi, pulse_params["pulse"]]]
+    
+    # Simulate pulses and wait time
     for i in range(num_iter):
-        if finite_pulses:            
-            H_ry_pi2 = get_ry_pi2_hamiltonian(amp=pulse_params["amp"])
-            
-            H_pulse = [H, [H_ry_pi2, pulse_params["pulse"]]]
+        if finite_pulses:
             psi_flip = qt.mesolve(H_pulse, state, pulse_params["timesteps"], c_ops).states[-1]
 
         else:
             psi_flip = Ry(np.pi / 2) * state * Ry(np.pi / 2).dag()
         results = qt.mesolve(H, psi_flip, pulse_interval, c_ops=c_ops)
         state = results.states[-1]
+        
     return state
 
 def kerr_hamiltonian_simulation(H, state, device_params, experiment_params):
