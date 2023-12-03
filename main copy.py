@@ -190,43 +190,6 @@ if __name__ == "__main__":
                 finite_pulses=finite_pulses,
                 pulse_params=p_params,
             )
-
-        elif experiment == "chi_pi": #pi
-            state = chi_hamiltonian_simulation_pi(
-                H=ham,
-                state=state,
-                device_params=d_params,
-                exp_params=e_params,
-                finite_pulses=finite_pulses,
-                pulse_params=p_params,
-            )
-        elif experiment == "chi_pi_mine": #pi
-            state = chi_hamiltonian_simulation_pi_mine(
-                H=ham,
-                state=state,
-                device_params=d_params,
-                exp_params=e_params,
-                finite_pulses=finite_pulses,
-                pulse_params=p_params,
-            )    
-        elif experiment == "chi_pi2_wait": #pi
-            state = chi_hamiltonian_simulation_wait(
-                H=ham,
-                state=state,
-                device_params=d_params,
-                exp_params=e_params,
-                finite_pulses=finite_pulses,
-                pulse_params=p_params,
-            )    
-        elif experiment == "chi_pi_wait_old": #pi
-            state = chi_new_hamiltonian_simulation(
-                H=ham,
-                state=state,
-                device_params=d_params,
-                exp_params=e_params,
-                finite_pulses=finite_pulses,
-                pulse_params=p_params,
-            )         
         else:
             state = kerr_hamiltonian_simulation(
                 H=ham,
