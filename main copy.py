@@ -3,7 +3,7 @@ import qutip as qt
 import matplotlib.pyplot as plt
 
 from experiments import (
-    chi_hamiltonian_simulation_pi2,
+    chi_hamiltonian_simulation,
     kerr_hamiltonian_simulation,
     char_func_ideal_1d,
     char_func_ideal_2d,
@@ -15,7 +15,6 @@ from pulses import (
     u_e,
     Pg,
     get_dispersive_hamiltonian,
-    get_ry_pi_hamiltonian,
 )
 
 from pulse_utils import (
@@ -34,18 +33,6 @@ from plotting import (
     plot_wigner,
 )
 
-# device_params = {
-#     "chi": 0.008e-3,  # in GHz
-#     "T1": 15e3,  # 15e3,  # in ns
-#     "T2": 400,  # in ns
-#     "cavT1": 30e3,  # in ns
-#     "nbar_cav": 0.03,  # thermal state population of cavity
-#     "anharm": -0.21297,  # anharmonicity of qubit in GHz
-#     "g": 7.3e-3,  # coupling strength in GHz
-#     "nbar_qubit": 0.05,  # thermal state population of qubit
-#     "kerr": 0.000000006,#0.000006,  # overwrites analytical value of kerr (in GHz) if not None
-# }
-
 device_params = {
     "chi": 0.679e-3, #1e-3, #0.94e-3, #0.679e-3,  # in GHz   0.679e-3
     "T1": 15e3,  # 15e3,  # in ns
@@ -53,7 +40,7 @@ device_params = {
     # "T2": 400, #400,  # in ns
     "cavT1": 30e3,  # in ns
     "nbar_cav": 0.03,  # thermal state population of cavity
-    "anharm": -0.21297,  # anharmonicity of qubit in GHz
+    "anharm": 0.200,  # anharmonicity of qubit in GHz
     "g": 7.3e-3,  # coupling strength in GHz
     "nbar_qubit": 0.05,  # thermal state population of qubit
     "kerr": 0.000006,  # overwrites analytical value of kerr (in GHz) if not None
@@ -64,17 +51,15 @@ pi_pulse_params = {
     "pulse_length": 100,  # in ns, only for constant pulses
     "sigma": 10,  # in ns, only for gaussian pulses
     "chop": 4,  # only for gaussian pulses
-    "amp": None,  # to be set during runtime
+    "rabi_freq": None,  # to be set during runtime
     "pulse": None,  # to be set during runtime
     "timesteps": None,  # to be set during runtime
-    "theta": 2*np.pi * 0.01,
-    "phase": 2*np.pi * 0.01,
 }
 experiment_params = {
     "alpha": 1.5,  # choose the coherent state you want to create
     "num_iter":10,  # only for chi experiments
     "pulse_interval": None,  # in ns, only for chi experiments
-    "amp_scale": 1,  # only for chi long experiments
+    "amp_scale": 1,  # Use 1 for pi, 0.5 for pi2. Only for chi long experiments
     "pulse_time": 1e3,  # only for chi long experiments
     "wait_time": 10e3,  # in ns, only for kerr experiments
     "evolve_time": 10e3,  # in ns, only for old chi exp
@@ -106,15 +91,13 @@ label_scale_factor = 1  # For figure labels
 
 # choose between kerr or chi experiment
 experiment = "chi_pi2" 
-# choose to include kerr term in hamiltonian
-include_kerr = True #True
 # choose if finite pulses are to be used (only applicable for chi exp)
 finite_pulses = True # False #True
 
 project_to_ground = True
 
 # Measurement params
-plot_type = "char"#"char" wigner
+plot_type = "char" # char/ wigner
 plot_data = False
 max_alpha = 4
 npts = 101
@@ -156,10 +139,8 @@ if __name__ == "__main__":
         d_params = system_params["device_params"]
         p_params = system_params["pi_pulse_params"]
         e_params = system_params["experiment_params"]
-
         # setting system hamiltonian
-        if include_kerr:
-            ham = get_dispersive_hamiltonian(device_params=d_params)
+        ham = get_dispersive_hamiltonian(device_params=d_params)
 
         # state preparation
         Ds = qt.displace(cdim, e_params["alpha"])
@@ -179,7 +160,7 @@ if __name__ == "__main__":
         # experiment
         
         if experiment == "chi_pi2": #pi2 chi
-            state = chi_hamiltonian_simulation_pi2(
+            state = chi_hamiltonian_simulation(
                 H=ham,
                 state=state,
                 device_params=d_params,
@@ -318,7 +299,3 @@ if __name__ == "__main__":
             fontsize=6,
         )
         plt.show()
-    # print(get_ry_pi_hamiltonian(system_params["pi_pulse_params"]))
-    # amp=pulse_params["amp"]
-    
-    
